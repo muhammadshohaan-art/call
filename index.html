@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OnCall By iSHOHAN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Custom Premium Animations */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .anim-pulse { animation: pulse-ring 2s infinite; }
+        
+        @keyframes slide-up {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .anim-slide-up { animation: slide-up 0.4s ease-out forwards; }
+
+        /* Smooth UI Transitions */
+        .ui-section { display: none; }
+        .ui-section.active { display: flex; }
+
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex items-center justify-center">
+
+    <audio id="remoteAudio" autoplay></audio>
+
+    <div class="w-full max-w-md h-full sm:h-[800px] sm:rounded-[40px] shadow-2xl shadow-black/60 relative overflow-hidden bg-slate-900 border-0 sm:border-8 border-slate-800 flex flex-col">
+        
+        <div class="px-6 py-4 flex justify-between items-center z-10 border-b border-slate-700/50">
+            <div class="flex items-center space-x-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.36 17.53C16.14 17.81 15.82 17.96 15.49 17.96C15.29 17.96 15.1 17.91 14.92 17.8C13.9 17.2 13 16.51 12.28 15.77C11.55 15.03 10.97 14.2 10.51 13.3C10.05 12.39 9.81 11.45 9.81 10.5C9.81 9.94 9.95 9.42 10.22 8.95L11.72 9.84C11.66 10.03 11.63 10.26 11.63 10.5C11.63 11.3 11.85 12.06 12.24 12.78C12.63 13.5 13.16 14.15 13.8 14.7C14.44 15.25 15.16 15.69 15.93 16.02L16.36 17.53ZM18.77 13.3C18.42 13.88 17.97 14.39 17.43 14.81L16.03 13.79C16.34 13.55 16.6 13.26 16.8 12.92L18.77 13.3Z" fill="#22C55E"/>
+                </svg>
+                <h1 class="text-xl font-bold tracking-tight text-white/90">OnCall<span class="text-green-500"> By iSHOHAN</span></h1>
+            </div>
+            <div id="connectionStatus" class="flex items-center space-x-2 text-xs font-medium text-amber-500">
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                <span>Connecting server...</span>
+            </div>
+        </div>
+
+        <div class="flex-1 relative p-6 flex flex-col justify-center">
+            
+            <div id="section-setup" class="ui-section active flex-col space-y-8 anim-slide-up">
+                <div class="text-center space-y-2">
+                    <div class="w-24 h-24 bg-slate-800 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg">
+                        <i class="fa-solid fa-phone-volume text-4xl text-green-500"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold">Start a Call</h2>
+                    <p class="text-slate-400 text-sm">Create a new room or join an existing one to start talking.</p>
+                </div>
+
+                <div class="space-y-4 pt-4">
+                    <button id="btnCreateRoom" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-green-500/30 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Create New Room</span>
+                    </button>
+                    
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-slate-700"></div>
+                        <span class="flex-shrink-0 mx-4 text-slate-500 text-sm">OR</span>
+                        <div class="flex-grow border-t border-slate-700"></div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <input type="text" id="joinRoomInput" placeholder="Enter Room ID" class="w-full bg-slate-800 text-center text-white text-lg px-4 py-4 rounded-2xl border border-slate-700 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all placeholder-slate-500 uppercase tracking-widest">
+                        <button id="btnJoinRoom" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-4 rounded-2xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Join Room
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-calling" class="ui-section flex-col items-center justify-between h-full py-10 anim-slide-up">
+                <div class="text-center space-y-4">
+                    <h3 class="text-slate-400 text-lg">Calling...</h3>
+                    <div class="text-4xl font-mono tracking-widest text-white font-bold" id="displayRoomId">------</div>
+                    <p class="text-sm text-slate-500">Share this Room ID with your friend</p>
+                    <button id="btnCopyRoom" class="mt-2 px-4 py-2 bg-slate-800 rounded-full text-sm text-slate-300 hover:text-white transition-colors">
+                        <i class="fa-regular fa-copy mr-2"></i>Copy ID
+                    </button>
+                </div>
+                
+                <div class="relative w-32 h-32 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-green-500/20 anim-pulse"></div>
+                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center z-10">
+                        <i class="fa-solid fa-user text-3xl text-slate-400"></i>
+                    </div>
+                </div>
+
+                <div class="w-full px-8">
+                    <button id="btnCancelCall" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-4 rounded-full transition-all active:scale-95 shadow-lg shadow-red-500/30">
+                        <i class="fa-solid fa-phone-slash mr-2"></i> Cancel
+                    </button>
+                </div>
+            </div>
+
+            <div id="section-incoming" class="ui-section flex-col items-center justify-between h-full py-10 anim-slide-up">
+                <div class="text-center space-y-2">
+                    <h3 class="text-green-400 font-medium text-lg tracking-wide">Incoming Call</h3>
+                    <p class="text-slate-400 text-sm">Room ID: <span id="incomingRoomId" class="text-white font-mono"></span></p>
+                </div>
+                
+                <div class="relative w-40 h-40 flex items-center justify-center my-8">
+                    <div class="absolute inset-0 rounded-full bg-green-500/30 anim-pulse"></div>
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=caller&backgroundColor=1e293b" alt="Caller" class="w-24 h-24 rounded-full z-10 border-4 border-slate-800 shadow-xl">
+                </div>
+
+                <div class="flex w-full justify-around px-4">
+                    <button id="btnRejectCall" class="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-xl text-white shadow-lg shadow-red-500/30 transition-transform active:scale-90">
+                        <i class="fa-solid fa-phone-slash"></i>
+                    </button>
+                    <button id="btnAcceptCall" class="w-16 h-16 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center text-xl text-white shadow-lg shadow-green-500/30 transition-transform active:scale-90 anim-pulse">
+                        <i class="fa-solid fa-phone"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="section-incall" class="ui-section flex-col items-center justify-between h-full py-10 anim-slide-up">
+                <div class="text-center space-y-2 w-full">
+                    <div class="flex items-center justify-center space-x-2 text-green-400 mb-2">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                        <span class="text-xs font-medium uppercase tracking-wider">End-to-End Encrypted</span>
+                    </div>
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=connected&backgroundColor=1e293b" alt="Connected" class="w-28 h-28 rounded-full mx-auto border-4 border-green-500/50 shadow-2xl shadow-green-500/20 mb-4">
+                    <h3 class="text-2xl font-semibold text-white">Connected</h3>
+                    <div id="callTimer" class="text-slate-400 font-mono text-lg">00:00</div>
+                </div>
+                
+                <div class="glass-panel w-full rounded-[30px] p-6 flex justify-around items-center mt-10">
+                    <button id="btnMute" class="w-14 h-14 bg-slate-700 hover:bg-slate-600 rounded-full flex items-center justify-center text-white transition-colors">
+                        <i class="fa-solid fa-microphone text-lg"></i>
+                    </button>
+                    <button id="btnEndCall" class="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-red-500/30 transition-transform active:scale-90">
+                        <i class="fa-solid fa-phone-slash text-xl"></i>
+                    </button>
+                    <button id="btnSpeaker" class="w-14 h-14 bg-slate-700 hover:bg-slate-600 rounded-full flex items-center justify-center text-white transition-colors">
+                        <i class="fa-solid fa-volume-high text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+            <div class="absolute -top-[20%] -right-[10%] w-[70%] h-[50%] bg-green-500/10 rounded-full blur-[100px]"></div>
+            <div class="absolute -bottom-[20%] -left-[10%] w-[70%] h-[50%] bg-blue-500/10 rounded-full blur-[100px]"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- 1. FIREBASE IMPORTS & SETUP ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your specific Firebase Configuration
+        const defaultFirebaseConfig = {
+            apiKey: "AIzaSyDErXguRyP3Gd05ywzlp_3v75E03yjQz1M",
+            authDomain: "oncall-firestore.firebaseapp.com",
+            projectId: "oncall-firestore",
+            storageBucket: "oncall-firestore.firebasestorage.app",
+            messagingSenderId: "33901398656",
+            appId: "1:33901398656:web:da0327cbbc2b30d61eb465"
+        };
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : defaultFirebaseConfig;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'standalone-voice-app';
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- 2. WEBRTC CONFIGURATION ---
+        const peerConnectionConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        // --- 3. STATE VARIABLES ---
+        let peerConnection = null;
+        let localStream = null;
+        let remoteStream = null;
+        let currentRoomId = null;
+        let roomUnsubscribe = null;
+        let candidatesUnsubscribe1 = null;
+        let candidatesUnsubscribe2 = null;
+        let isMuted = false;
+        let timerInterval = null;
+        let secondsActive = 0;
+        let role = null; 
+
+        // DOM Elements
+        const remoteAudio = document.getElementById('remoteAudio');
+        const sections = {
+            setup: document.getElementById('section-setup'),
+            calling: document.getElementById('section-calling'),
+            incoming: document.getElementById('section-incoming'),
+            incall: document.getElementById('section-incall')
+        };
+
+        // --- 4. RINGTONE SYNTHESIZER ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let ringtoneInterval = null;
+
+        function playSyntheticRingtone() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const playBeep = () => {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.2);
+                
+                gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            };
+
+            const playDoubleBeep = () => {
+                playBeep();
+                setTimeout(playBeep, 200);
+            };
+
+            playDoubleBeep();
+            ringtoneInterval = setInterval(playDoubleBeep, 2000);
+        }
+
+        function stopSyntheticRingtone() {
+            if (ringtoneInterval) {
+                clearInterval(ringtoneInterval);
+                ringtoneInterval = null;
+            }
+        }
+
+        // --- 5. CORE LOGIC ---
+        async function initializeAppAuth() {
+            try {
+                await signInAnonymously(auth);
+                
+                onAuthStateChanged(auth, (user) => {
+                    const statusEl = document.getElementById('connectionStatus');
+                    if (user) {
+                        statusEl.innerHTML = '<i class="fa-solid fa-circle text-[10px] text-green-500"></i><span class="text-green-500">Ready</span>';
+                        document.getElementById('btnCreateRoom').disabled = false;
+                        document.getElementById('btnJoinRoom').disabled = false;
+                    } else {
+                        statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-red-500"></i><span class="text-red-500">Disconnected</span>';
+                    }
+                });
+            } catch (error) {
+                console.error("Auth error:", error);
+                document.getElementById('connectionStatus').innerHTML = '<span class="text-red-500">Auth Failed</span>';
+            }
+        }
+
+        function switchUI(state) {
+            Object.values(sections).forEach(sec => sec.classList.remove('active'));
+            sections[state].classList.add('active');
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function startTimer() {
+            secondsActive = 0;
+            document.getElementById('callTimer').innerText = "00:00";
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsActive++;
+                document.getElementById('callTimer').innerText = formatTime(secondsActive);
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        async function getLocalStream() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                return true;
+            } catch (error) {
+                console.error("Microphone access denied:", error);
+                alert("Microphone access is required for calling.");
+                return false;
+            }
+        }
+
+        function generateRoomId() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        function getRoomsCollection() {
+            return collection(db, 'artifacts', appId, 'public', 'data', 'rooms');
+        }
+
+        // --- WEBRTC CALLING LOGIC ---
+        async function createRoom() {
+            if (!auth.currentUser) return;
+            const hasMic = await getLocalStream();
+            if (!hasMic) return;
+
+            currentRoomId = generateRoomId();
+            role = 'caller';
+            
+            document.getElementById('displayRoomId').innerText = currentRoomId;
+            switchUI('calling');
+            playSyntheticRingtone();
+
+            const roomsRef = getRoomsCollection();
+            const roomDoc = doc(roomsRef, currentRoomId);
+            
+            peerConnection = new RTCPeerConnection(peerConnectionConfig);
+
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            remoteStream = new MediaStream();
+            remoteAudio.srcObject = remoteStream;
+            peerConnection.ontrack = event => {
+                event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+            };
+
+            const callerCandidatesCollection = collection(roomDoc, 'callerCandidates');
+            peerConnection.onicecandidate = event => {
+                if (event.candidate) {
+                    addDoc(callerCandidatesCollection, event.candidate.toJSON());
+                }
+            };
+
+            peerConnection.oniceconnectionstatechange = () => {
+                if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
+                    hangUp();
+                }
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            const roomData = {
+                offer: { type: offer.type, sdp: offer.sdp },
+                createdAt: Date.now(),
+                status: 'waiting'
+            };
+            await setDoc(roomDoc, roomData);
+
+            roomUnsubscribe = onSnapshot(roomDoc, async snapshot => {
+                const data = snapshot.data();
+                if (!peerConnection.currentRemoteDescription && data && data.answer) {
+                    stopSyntheticRingtone();
+                    const answer = new RTCSessionDescription(data.answer);
+                    await peerConnection.setRemoteDescription(answer);
+                    switchUI('incall');
+                    startTimer();
+                }
+                if (data && data.status === 'ended') {
+                    hangUp();
+                }
+                if (!snapshot.exists()) {
+                    hangUp();
+                }
+            }, (error) => console.error("Snapshot error:", error));
+
+            const calleeCandidatesCollection = collection(roomDoc, 'calleeCandidates');
+            candidatesUnsubscribe1 = onSnapshot(calleeCandidatesCollection, snapshot => {
+                snapshot.docChanges().forEach(async change => {
+                    if (change.type === 'added') {
+                        const candidate = new RTCIceCandidate(change.doc.data());
+                        await peerConnection.addIceCandidate(candidate);
+                    }
+                });
+            }, (error) => console.error("Snapshot error:", error));
+        }
+
+        async function promptJoinRoom(roomId) {
+            if (!auth.currentUser) return;
+            roomId = roomId.toUpperCase();
+            
+            const roomsRef = getRoomsCollection();
+            const roomDoc = doc(roomsRef, roomId);
+            const roomSnapshot = await getDoc(roomDoc);
+
+            if (!roomSnapshot.exists()) {
+                alert("Room not found or call already ended.");
+                return;
+            }
+
+            const data = roomSnapshot.data();
+            if (data.status === 'ended') {
+                alert("Call has ended.");
+                return;
+            }
+
+            currentRoomId = roomId;
+            document.getElementById('incomingRoomId').innerText = roomId;
+            switchUI('incoming');
+            playSyntheticRingtone();
+            
+            roomUnsubscribe = onSnapshot(roomDoc, snapshot => {
+                if (!snapshot.exists() || snapshot.data().status === 'ended') {
+                    stopSyntheticRingtone();
+                    hangUp();
+                }
+            }, (error) => console.error("Snapshot error:", error));
+        }
+
+        async function acceptCall() {
+            stopSyntheticRingtone();
+            role = 'callee';
+            
+            const hasMic = await getLocalStream();
+            if (!hasMic) {
+                hangUp();
+                return;
+            }
+
+            const roomsRef = getRoomsCollection();
+            const roomDoc = doc(roomsRef, currentRoomId);
+            const roomSnapshot = await getDoc(roomDoc);
+            
+            if (!roomSnapshot.exists()) return;
+
+            peerConnection = new RTCPeerConnection(peerConnectionConfig);
+            
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            remoteStream = new MediaStream();
+            remoteAudio.srcObject = remoteStream;
+            peerConnection.ontrack = event => {
+                event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+            };
+
+            const calleeCandidatesCollection = collection(roomDoc, 'calleeCandidates');
+            peerConnection.onicecandidate = event => {
+                if (event.candidate) {
+                    addDoc(calleeCandidatesCollection, event.candidate.toJSON());
+                }
+            };
+
+            peerConnection.oniceconnectionstatechange = () => {
+                if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
+                    hangUp();
+                }
+            };
+
+            const offer = roomSnapshot.data().offer;
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            await updateDoc(roomDoc, {
+                answer: { type: answer.type, sdp: answer.sdp },
+                status: 'connected'
+            });
+
+            switchUI('incall');
+            startTimer();
+
+            const callerCandidatesCollection = collection(roomDoc, 'callerCandidates');
+            candidatesUnsubscribe2 = onSnapshot(callerCandidatesCollection, snapshot => {
+                snapshot.docChanges().forEach(async change => {
+                    if (change.type === 'added') {
+                        const candidate = new RTCIceCandidate(change.doc.data());
+                        await peerConnection.addIceCandidate(candidate);
+                    }
+                });
+            }, (error) => console.error("Snapshot error:", error));
+        }
+
+        async function hangUp() {
+            stopSyntheticRingtone();
+            stopTimer();
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            if (remoteStream) {
+                remoteStream.getTracks().forEach(track => track.stop());
+                remoteStream = null;
+            }
+
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
+            if (currentRoomId && auth.currentUser) {
+                try {
+                    const roomDoc = doc(getRoomsCollection(), currentRoomId);
+                    await updateDoc(roomDoc, { status: 'ended' });
+                    if (role === 'caller') {
+                        await deleteDoc(roomDoc);
+                    }
+                } catch (e) {
+                    console.log("Cleanup handled or document already missing");
+                }
+            }
+
+            if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
+            if (candidatesUnsubscribe1) { candidatesUnsubscribe1(); candidatesUnsubscribe1 = null; }
+            if (candidatesUnsubscribe2) { candidatesUnsubscribe2(); candidatesUnsubscribe2 = null; }
+
+            currentRoomId = null;
+            role = null;
+            
+            document.getElementById('joinRoomInput').value = '';
+            isMuted = false;
+            updateMuteButtonUI();
+            switchUI('setup');
+        }
+
+        function toggleMute() {
+            if (localStream) {
+                const audioTrack = localStream.getAudioTracks()[0];
+                isMuted = !isMuted;
+                audioTrack.enabled = !isMuted;
+                updateMuteButtonUI();
+            }
+        }
+
+        function updateMuteButtonUI() {
+            const btn = document.getElementById('btnMute');
+            if (isMuted) {
+                btn.innerHTML = '<i class="fa-solid fa-microphone-slash text-lg"></i>';
+                btn.classList.replace('bg-slate-700', 'bg-red-500');
+                btn.classList.replace('hover:bg-slate-600', 'hover:bg-red-600');
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-microphone text-lg"></i>';
+                btn.classList.replace('bg-red-500', 'bg-slate-700');
+                btn.classList.replace('hover:bg-red-600', 'hover:bg-slate-600');
+            }
+        }
+
+        // --- 6. EVENT LISTENERS ---
+        document.getElementById('btnCreateRoom').addEventListener('click', createRoom);
+        
+        document.getElementById('btnJoinRoom').addEventListener('click', () => {
+            const roomId = document.getElementById('joinRoomInput').value.trim();
+            if (roomId.length >= 4) {
+                promptJoinRoom(roomId);
+            } else {
+                alert("Please enter a valid Room ID");
+            }
+        });
+
+        document.getElementById('btnCancelCall').addEventListener('click', hangUp);
+        document.getElementById('btnRejectCall').addEventListener('click', hangUp);
+        document.getElementById('btnAcceptCall').addEventListener('click', acceptCall);
+        document.getElementById('btnEndCall').addEventListener('click', hangUp);
+        document.getElementById('btnMute').addEventListener('click', toggleMute);
+
+        document.getElementById('btnCopyRoom').addEventListener('click', () => {
+            if (currentRoomId) {
+                const textarea = document.createElement("textarea");
+                textarea.value = currentRoomId;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand("copy");
+                    const btn = document.getElementById('btnCopyRoom');
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Copied!';
+                    btn.classList.replace('text-slate-300', 'text-green-400');
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.classList.replace('text-green-400', 'text-slate-300');
+                    }, 2000);
+                } catch (err) {
+                    console.error("Failed to copy", err);
+                }
+                document.body.removeChild(textarea);
+            }
+        });
+
+        // Initialize Application
+        initializeAppAuth();
+
+    </script>
+</body>
+</html>
+
+
