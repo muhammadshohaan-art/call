@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDRECI | Auto-Proposal Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f172a; color: #f8fafc; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .input-field { background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; transition: 0.3s; }
+        .input-field:focus { border-color: #38bdf8; outline: none; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const App = () => {
+            const [data, setData] = useState({
+                clientName: '',
+                problem: '',
+                category: 'Web Development'
+            });
+            const [result, setResult] = useState('');
+            const [copied, setCopied] = useState(false);
+
+            // --- AUTO-PORTFOLIO DATABASE ---
+            const portfolioBank = {
+                "Web Development": "https://upwork.com/agencies/bdreci", 
+                "Graphic Design": "https://www.creativefabrica.com/designer/shadowmind-graphics/",
+                "UI/UX Design": "https://upwork.com/agencies/bdreci"
+            };
+
+            // --- AUTO-SOLUTION DATABASE (NO FLUFF) ---
+            const solutionBank = {
+                "Web Development": [
+                    "optimize the code structure and fix the responsiveness so it works perfectly on all devices.",
+                    "build a clean, fast-loading layout that focuses on performance and easy navigation.",
+                    "fix the underlying bugs and ensure the UI matches your brand's requirements exactly."
+                ],
+                "Graphic Design": [
+                    "keep the design bold and professional, focusing on clear visuals rather than extra noise.",
+                    "rework the current design elements to give them a modern look that stands out.",
+                    "create a clean visual style that is ready for both high-quality print and web use."
+                ],
+                "UI/UX Design": [
+                    "simplify the user journey and make the interface more intuitive for your customers.",
+                    "clean up the current layout to ensure the most important actions are easy to find.",
+                    "focus on a user-centric design that looks professional and functions smoothly."
+                ]
+            };
+
+            const generateProposal = () => {
+                const { clientName, problem, category } = data;
+                
+                // Rule 1: Human Intro & Mirroring
+                const intro = clientName ? `Hi ${clientName},` : 'Hi there,';
+                const hook = `I noticed you're looking for help with ${problem.toLowerCase() || 'this specific task'}.`;
+
+                // Rule 2: Random Auto-Solution (No Fluff)
+                const categorySolutions = solutionBank[category];
+                const autoSolution = categorySolutions[Math.floor(Math.random() * categorySolutions.length)];
+                
+                // Rule 3: Auto Portfolio Selection
+                const autoPortfolio = portfolioBank[category];
+
+                // Rule 4: Conversational Fillers (Anti-AI Logic)
+                const fillers = [
+                    "Honestly, I've seen this before and it's quite simple to fix.",
+                    "To be fair, it's a common issue but I can get it sorted for you quickly.",
+                    "I’d love to take this off your hands so you can focus on other priorities.",
+                    "Just a quick thought: keeping the approach simple usually works best for this."
+                ];
+                const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
+
+                // Rule 5: Final Humanized Assembly
+                const proposal = `
+${intro}
+
+${hook} ${randomFiller}
+
+My plan is to ${autoSolution} I prefer a direct approach—no extra fluff or complicated terms, just a working result.
+
+I've done similar work recently. You can check the quality here: ${autoPortfolio}
+
+Are you free for a quick chat? I'd like to hear more about your goals for this.
+
+Best,
+Shahanur
+                `.trim();
+
+                setResult(proposal);
+            };
+
+            return (
+                <div className="max-w-5xl mx-auto py-12 px-6">
+                    <div className="text-center mb-10">
+                        <h1 className="text-4xl font-extrabold bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent mb-2">
+                            BDRECI | Proposal Engine ⚡
+                        </h1>
+                        <p className="text-slate-400">Personal AI Assistant for Shahanur Rahman</p>
+                    </div>
+
+                    <div className="grid lg:grid-cols-2 gap-8">
+                        {/* INPUT PANEL */}
+                        <div className="glass-card p-8 rounded-3xl shadow-2xl border-white/5">
+                            <div className="space-y-5">
+                                <div>
+                                    <label className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Client's Name</label>
+                                    <input type="text" placeholder="e.g. John Doe" className="w-full mt-1 p-3 rounded-xl input-field text-white text-sm" 
+                                    onChange={(e) => setData({...data, clientName: e.target.value})}/>
+                                </div>
+                                
+                                <div>
+                                    <label className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Client's Problem (Mirroring)</label>
+                                    <textarea placeholder="e.g. website is slow" className="w-full mt-1 p-3 rounded-xl input-field text-white text-sm h-20" 
+                                    onChange={(e) => setData({...data, problem: e.target.value})}/>
+                                </div>
+
+                                <div>
+                                    <label className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Job Category</label>
+                                    <select className="w-full mt-1 p-3 rounded-xl input-field text-white text-sm" 
+                                    onChange={(e) => setData({...data, category: e.target.value})}>
+                                        <option>Web Development</option>
+                                        <option>Graphic Design</option>
+                                        <option>UI/UX Design</option>
+                                    </select>
+                                </div>
+
+                                <button onClick={generateProposal} className="w-full bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold py-4 rounded-xl transition-all transform active:scale-95 shadow-lg shadow-sky-500/20">
+                                    GENERATE HUMAN PROPOSAL 🚀
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* OUTPUT PANEL */}
+                        <div className="flex flex-col h-full">
+                            <div className="flex-grow glass-card p-8 rounded-3xl border-sky-500/20 relative bg-slate-900/40 min-h-[350px]">
+                                <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                                    <span className="text-sky-400 text-[10px] font-bold uppercase tracking-widest italic">Secret Humanized Output</span>
+                                    {result && (
+                                        <button onClick={() => {navigator.clipboard.writeText(result); setCopied(true); setTimeout(()=>setCopied(false),2000)}} 
+                                        className="text-[10px] font-bold bg-sky-500/10 text-sky-400 px-3 py-1 rounded-full border border-sky-500/20 transition">
+                                            {copied ? '✅ COPIED' : '📋 COPY'}
+                                        </button>
+                                    )}
+                                </div>
+                                {result ? (
+                                    <div className="text-slate-300 leading-relaxed whitespace-pre-wrap text-sm italic">
+                                        {result}
+                                    </div>
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center text-slate-600 italic text-sm text-center">
+                                        <p>Select category, enter the client's problem, and let the AI build a humanized response.</p>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="mt-4 p-3 rounded-xl bg-sky-500/5 border border-sky-500/10 flex items-center gap-3">
+                                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                                <p className="text-[9px] text-sky-400/80 uppercase font-bold tracking-widest">
+                                    Logic: No-Adjective Mode • BDRECI Auto-Link: Active • Tone: Human Conversational
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
